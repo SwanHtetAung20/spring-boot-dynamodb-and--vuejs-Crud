@@ -4,6 +4,7 @@ import axios from "axios";
 
 export const useCounterStore = defineStore("main", () => {
   let user = reactive({});
+  const isTrue = ref<boolean>(false);
 
   interface User {
     id: string;
@@ -11,9 +12,11 @@ export const useCounterStore = defineStore("main", () => {
     email: string;
     created_date: string;
     phoneNumber: string;
+    password?: string;
     photo?: string;
   }
   let userList = ref<User[]>([]);
+  const selectedUser = ref<User>();
 
   const login = async (obj: Object) => {
     try {
@@ -55,5 +58,30 @@ export const useCounterStore = defineStore("main", () => {
       throw error;
     }
   };
-  return { user, login, signUp, userList, findAll, deleteUser };
+
+  const updateUser = async (obj: User) => {
+    try {
+      const res = await axios.put(`api/${obj.id}/${obj.created_date}`, obj);
+      const index = userList.value.findIndex((user) => user.id === obj.id);
+      if (index !== -1) {
+        userList.value[index] = res.data.user;
+        isTrue.value = false;
+      }
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  return {
+    user,
+    login,
+    signUp,
+    userList,
+    findAll,
+    deleteUser,
+    isTrue,
+    selectedUser,
+    updateUser,
+  };
 });

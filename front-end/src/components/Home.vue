@@ -3,9 +3,11 @@ import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useCounterStore } from "@/stores/counter";
 import { useToast } from "vue-toastification";
+import UpdateForm from "./UpdateForm.vue";
+import { Interface } from "readline";
 
 const main = useCounterStore();
-const { userList } = storeToRefs(main);
+const { userList, isTrue, selectedUser } = storeToRefs(main);
 const { findAll, deleteUser } = main;
 const toast = useToast();
 
@@ -41,6 +43,11 @@ const deleteUserHandler = async (id: string, date: string) => {
     }
   }
 };
+
+const isShow = (user: Interface) => {
+  selectedUser.value = user;
+  isTrue.value = !isTrue.value;
+};
 </script>
 
 <template>
@@ -70,7 +77,7 @@ const deleteUserHandler = async (id: string, date: string) => {
             <td>{{ user.created_date }}</td>
             <td>{{ user.phoneNumber }}</td>
             <td>
-              <button class="actionBtn">
+              <button class="actionBtn" @click="isShow(user)">
                 <i class="pi pi-user-edit"></i> Update
               </button>
             </td>
@@ -87,6 +94,11 @@ const deleteUserHandler = async (id: string, date: string) => {
         </tbody>
       </table>
     </div>
+    <div v-show="isTrue" class="updateForm">
+      <div class="sub-updateForm">
+        <UpdateForm />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -95,6 +107,7 @@ const deleteUserHandler = async (id: string, date: string) => {
   max-width: 1024px;
   margin: 0 auto;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
@@ -102,7 +115,6 @@ const deleteUserHandler = async (id: string, date: string) => {
 
 .sub-header {
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
@@ -127,5 +139,12 @@ const deleteUserHandler = async (id: string, date: string) => {
   border-radius: 5px;
   border: 1px solid lightgray;
   cursor: pointer;
+}
+.updateForm {
+  width: 80%;
+}
+
+.sub-updateForm {
+  text-align: center;
 }
 </style>

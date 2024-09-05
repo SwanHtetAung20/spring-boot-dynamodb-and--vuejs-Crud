@@ -1,5 +1,6 @@
 package com.VueTestWithSpring.repositories;
 
+import com.VueTestWithSpring.dto.LoginDto;
 import com.VueTestWithSpring.dto.UserDto;
 import com.VueTestWithSpring.enitites.User;
 import com.VueTestWithSpring.exception.AppException;
@@ -7,6 +8,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ExpectedAttributeValue;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserRepo {
 
     private final DynamoDBMapper dynamoDBMapper;
@@ -113,4 +116,60 @@ public class UserRepo {
         return saveExpression;
     }
 
+    public UserDto login(LoginDto dto) {
+        var userDto = new UserDto();
+        try {
+            var user = loginHandler(dto);
+            if (user == null) {
+                throw new AppException("Email or Password is incorrect!", HttpStatus.NOT_FOUND);
+            }
+            log.info("Just Test =>" + user);
+            userDto.setStatusCode(200);
+            userDto.setMessage("Login Successful");
+            userDto.setUser(user);
+            return userDto;
+        } catch (Exception e) {
+            throw new AppException(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    // this approach is not good when your table is large as it takes many read capacity
+
+    // when your table is large, consider using email as gsi **
+    private User loginHandler(LoginDto dto) {
+        Map<String, AttributeValue> eav = new HashMap<>();
+        eav.put(":email", new AttributeValue().withS(dto.getEmail()));
+
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
+                .withFilterExpression("email = :email")
+                .withExpressionAttributeValues(eav);
+
+        List<User> users = dynamoDBMapper.scan(User.class, scanExpression);
+
+
+        if (!users.isEmpty() && users.get(0).getPassword().equals(dto.getPassword())) {
+            return users.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    public UserDto signUp(LoginDto dto) {
+        var userDto = new UserDto();
+        var user = User.builder()
+                .created_date(dto.getDate())
+                .email(dto.getEmail())
+                .password(dto.getPassword())
+                .build();
+        try {
+            dynamoDBMapper.save(user);
+            userDto.setUser(user);
+            userDto.setMessage("Successfully Sign-up! Please Login back");
+            userDto.setStatusCode(200);
+            return userDto;
+        } catch (Exception e) {
+            throw new AppException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

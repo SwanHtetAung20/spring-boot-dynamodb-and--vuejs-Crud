@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import SignUp from "./components/SignUp.vue";
+import Home from "./components/Home.vue";
 </script>
 
 <template>
-  <SignUp />
+  <Home />
 </template>

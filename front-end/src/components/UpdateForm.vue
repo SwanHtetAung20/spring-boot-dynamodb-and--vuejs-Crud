@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useCounterStore } from "@/stores/counter";
 import { storeToRefs } from "pinia";
-import { Interface } from "readline";
 import { ref, computed } from "vue";
 import { useToast } from "vue-toastification";
 
@@ -11,7 +10,7 @@ const { selectedUser } = storeToRefs(main);
 const { updateUser } = main;
 const toast = useToast();
 
-const user = computed<Interface>(
+const user = computed<any>(
   () =>
     selectedUser.value || {
       id: "",
@@ -53,6 +52,9 @@ const updateFormHandler = async () => {
         class="inputType"
         v-model="user.created_date"
       />
+    </div>
+    <div>
+      <input type="text" class="inputType" v-model="user.name" />
     </div>
     <div>
       <input

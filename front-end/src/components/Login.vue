@@ -2,11 +2,14 @@
 import { ref } from "vue";
 import { useCounterStore } from "../stores/counter";
 import { useToast } from "vue-toastification";
+import { useRouter } from "vue-router";
+import { RouterLink } from "vue-router";
 
 const main = useCounterStore();
 const email = ref("");
 const password = ref("");
 const toast = useToast();
+const router = useRouter();
 
 const { login } = main;
 
@@ -22,6 +25,7 @@ const loginHandler = async () => {
       return;
     }
     toast.success(res.message);
+    router.push("/home");
   } catch (error: any) {
     (email.value = ""), (password.value = "");
     if (error.response) {
@@ -63,10 +67,10 @@ const loginHandler = async () => {
         <div class="footer">
           <span
             >If you don't have an account!Please
-            <a
+            <RouterLink to="/sign-up"
               ><strong :style="{ color: 'green', cursor: 'pointer' }"
                 >Sign Up</strong
-              ></a
+              ></RouterLink
             >here</span
           >
         </div>

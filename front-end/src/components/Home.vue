@@ -17,7 +17,10 @@ onMounted(async () => {
     console.log("UserList", userList);
   } catch (error: any) {
     if (error.response) {
-      toast.error(error.response.data.message);
+      toast.error(
+        error.response.data.message ||
+          "An unexpected error occurred. Please try again later."
+      );
     } else {
       toast.error("An unexpected error occurred. Please try again later.");
     }

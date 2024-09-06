@@ -207,4 +207,37 @@ public class UserRepo {
             throw new AppException(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
+    public UserDto findUsersWithName(String name) {
+        var dto = new UserDto();
+        try {
+            var users = searchHandler(name);
+            dto.setUserList(users);
+            dto.setStatusCode(200);
+            return dto;
+        } catch (Exception e) {
+            throw new AppException(e.getMessage(), HttpStatus.BAD_REQUEST);
+
+        }
+    }
+
+    private List<User> searchHandler(String name) {
+        Map<String, String> ean = new HashMap<>();
+        ean.put("#name", "name");
+        Map<String, AttributeValue> eav = new HashMap<>();
+        eav.put(":name", new AttributeValue().withS(name));
+
+        DynamoDBQueryExpression<User> queryExpression = new DynamoDBQueryExpression<User>()
+                .withIndexName("gsi-name")
+                .withConsistentRead(false)
+                .withKeyConditionExpression("#name = :name")
+                .withExpressionAttributeNames(ean)
+                .withExpressionAttributeValues(eav)
+                .withLimit(10);
+        var users = dynamoDBMapper.query(User.class, queryExpression);
+        if (users.isEmpty()) {
+            throw new AppException("There is no user with that name", HttpStatus.NOT_FOUND);
+        }
+        return users;
+    }
 }

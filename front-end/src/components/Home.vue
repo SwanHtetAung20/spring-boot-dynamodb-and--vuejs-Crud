@@ -97,6 +97,7 @@ const searchVal = async () => {
       toast.error("There is no user with that name");
       return;
     }
+    searchValue.value = "";
     userList.value = res.userList;
   } catch (error: any) {
     if (error.response) {
@@ -120,7 +121,14 @@ const searchVal = async () => {
         />
       </div>
       <div class="searchDiv">
-        <button class="searchBtn" @click="searchVal">Search</button>
+        <button class="searchBtn" @click="searchVal">
+          <i class="pi pi-search"></i> Search
+        </button>
+      </div>
+      <div class="resetDiv">
+        <button class="searchBtn" @click="findAll">
+          <i class="pi pi-refresh"></i> Reset
+        </button>
       </div>
     </div>
     <div class="sub-header">
@@ -268,5 +276,9 @@ const searchVal = async () => {
   border-radius: 5px;
   border: 1px solid lightgray;
   cursor: pointer;
+}
+
+.searchDiv {
+  margin-right: 10px;
 }
 </style>

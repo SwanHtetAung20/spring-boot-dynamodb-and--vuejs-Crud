@@ -21,6 +21,7 @@ public class User {
     private String created_date;
 
     @DynamoDBAttribute
+    @DynamoDBIndexHashKey(attributeName = "name",globalSecondaryIndexName = "gsi-name")
     private String name;
     @DynamoDBAttribute
     private String email;

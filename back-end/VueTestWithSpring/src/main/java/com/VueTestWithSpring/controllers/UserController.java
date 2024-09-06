@@ -41,7 +41,12 @@ public class UserController {
     }
 
     @PutMapping("/change-profile")
-    public ResponseEntity<UserDto> changeProfile(@RequestParam String id, @RequestParam String date, @RequestParam MultipartFile file){
-        return  ResponseEntity.status(HttpStatus.OK).body(userRepo.uploadPhoto(id,date,file));
+    public ResponseEntity<UserDto> changeProfile(@RequestParam String id, @RequestParam String date, @RequestParam MultipartFile file) {
+        return ResponseEntity.status(HttpStatus.OK).body(userRepo.uploadPhoto(id, date, file));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<UserDto> searchUsersWithName(@RequestParam String name) {
+        return ResponseEntity.status(HttpStatus.OK).body(userRepo.findUsersWithName(name));
     }
 }

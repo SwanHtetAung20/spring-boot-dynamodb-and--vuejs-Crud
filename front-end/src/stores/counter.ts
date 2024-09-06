@@ -98,7 +98,9 @@ export const useCounterStore = defineStore("main", () => {
 
   const searchHandler = async (name: string) => {
     try {
-      const res = await axios.post(`api/search`, name);
+      const res = await axios.get(`api/search`, {
+        params: { name },
+      });
       return res.data;
     } catch (error) {
       throw error;

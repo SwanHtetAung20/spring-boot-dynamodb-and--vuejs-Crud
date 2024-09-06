@@ -73,6 +73,29 @@ export const useCounterStore = defineStore("main", () => {
     }
   };
 
+  const modifyProfilePhoto = async (id: string, date: string, file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("id", id);
+      formData.append("date", date);
+      formData.append("file", file);
+      const res = await axios.put(`api/change-profile`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      const index = userList.value.findIndex(
+        (user) => user.id === id && user.created_date === date
+      );
+      if (index !== -1) {
+        userList.value[index] = res.data.user;
+      }
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return {
     user,
     login,
@@ -83,5 +106,6 @@ export const useCounterStore = defineStore("main", () => {
     isTrue,
     selectedUser,
     updateUser,
+    modifyProfilePhoto,
   };
 });

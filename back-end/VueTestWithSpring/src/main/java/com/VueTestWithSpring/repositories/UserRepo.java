@@ -11,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -170,6 +172,39 @@ public class UserRepo {
             return userDto;
         } catch (Exception e) {
             throw new AppException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public UserDto uploadPhoto(String id, String date, MultipartFile file) {
+        var dto = new UserDto();
+        try {
+            var user = uploadPhotoHandler(id, date, file);
+            dto.setStatusCode(200);
+            dto.setUser(user);
+            dto.setMessage("Uploaded successfully");
+            return dto;
+        } catch (Exception e) {
+            throw new AppException(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    private User uploadPhotoHandler(String id, String date, MultipartFile file) {
+        DynamoDBQueryExpression<User> queryExpression = new DynamoDBQueryExpression<User>()
+                .withHashKeyValues(User.builder().id(id).created_date(date).build());
+
+        var user = dynamoDBMapper.query(User.class, queryExpression);
+        if (user == null) {
+            throw new AppException("Something wrong! Please try again later", HttpStatus.NOT_FOUND);
+        }
+        try {
+            byte[] photoByte = file.getBytes();
+            String encodedString = Base64.getEncoder().encodeToString(photoByte);
+            user.get(0).setPhoto(encodedString);
+            dynamoDBMapper.save(user.get(0), dynamodbSaveExpression(id, date));
+            return user.get(0);
+        } catch (Exception e) {
+            throw new AppException(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,5 +38,10 @@ public class UserController {
     @PutMapping("/{id}/{date}")
     public ResponseEntity<UserDto> updateUserHandler(@PathVariable("id") String id, @PathVariable("date") String date, @RequestBody UserDto userDto) {
         return ResponseEntity.status(HttpStatus.OK).body(userRepo.updateUser(id, date, userDto));
+    }
+
+    @PutMapping("/change-profile")
+    public ResponseEntity<UserDto> changeProfile(@RequestParam String id, @RequestParam String date, @RequestParam MultipartFile file){
+        return  ResponseEntity.status(HttpStatus.OK).body(userRepo.uploadPhoto(id,date,file));
     }
 }

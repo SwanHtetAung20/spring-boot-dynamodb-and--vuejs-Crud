@@ -8,7 +8,7 @@ import { Interface } from "readline";
 
 const main = useCounterStore();
 const { userList, isTrue, selectedUser } = storeToRefs(main);
-const { findAll, deleteUser } = main;
+const { findAll, deleteUser, modifyProfilePhoto } = main;
 const toast = useToast();
 
 onMounted(async () => {
@@ -51,6 +51,39 @@ const isShow = (user: Interface) => {
   selectedUser.value = user;
   isTrue.value = !isTrue.value;
 };
+
+const changeFile = (id: string, date: string) => {
+  const fileInput = document.getElementById(
+    `fileInput-${id}/${date}`
+  ) as HTMLInputElement;
+  if (fileInput) {
+    fileInput.click();
+  }
+};
+
+const fileHandler = async (event: Event, id: string, date: string) => {
+  try {
+    const fileInput = event.target as HTMLInputElement;
+    const file = fileInput.files ? fileInput.files[0] : null;
+
+    if (!file) {
+      toast.error("photo cannot be empty!");
+      return;
+    }
+    const res = await modifyProfilePhoto(id, date, file);
+    if (!res.user) {
+      toast.error(res.message);
+      return;
+    }
+    toast.success(res.message);
+  } catch (error: any) {
+    if (error.response) {
+      toast.error(error.response.data.message);
+    } else {
+      toast.error("An unexpected error occurred. Please try again later.");
+    }
+  }
+};
 </script>
 
 <template>
@@ -64,8 +97,10 @@ const isShow = (user: Interface) => {
             <th>Email</th>
             <th>Created Date</th>
             <th>Phone Number</th>
+            <th>Photo</th>
             <th>Update</th>
             <th>Delete</th>
+            <th>Change</th>
           </tr>
         </thead>
         <tbody>
@@ -80,6 +115,16 @@ const isShow = (user: Interface) => {
             <td>{{ user.created_date }}</td>
             <td>{{ user.phoneNumber }}</td>
             <td>
+              <div v-if="user.photo">
+                <img
+                  :src="'data:image/**;base64,' + user.photo"
+                  alt="Profile Image"
+                  :style="{ height: '100px', width: '100px' }"
+                />
+              </div>
+              <div v-else>UNDEFINED</div>
+            </td>
+            <td>
               <button class="actionBtn" @click="isShow(user)">
                 <i class="pi pi-user-edit"></i> Update
               </button>
@@ -93,6 +138,20 @@ const isShow = (user: Interface) => {
                 Delete
               </button>
             </td>
+            <td>
+              <button
+                class="actionBtn"
+                @click="changeFile(user.id, user.created_date)"
+              >
+                <i class="pi pi-images"></i> Change Profile
+              </button>
+            </td>
+            <input
+              type="file"
+              :id="`fileInput-${user.id}/${user.created_date}`"
+              style="display: none"
+              @change="fileHandler($event, user.id, user.created_date)"
+            />
           </tr>
         </tbody>
       </table>

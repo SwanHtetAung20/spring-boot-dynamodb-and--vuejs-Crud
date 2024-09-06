@@ -96,6 +96,15 @@ export const useCounterStore = defineStore("main", () => {
     }
   };
 
+  const searchHandler = async (name: string) => {
+    try {
+      const res = await axios.post(`api/search`, name);
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return {
     user,
     login,
@@ -107,5 +116,6 @@ export const useCounterStore = defineStore("main", () => {
     selectedUser,
     updateUser,
     modifyProfilePhoto,
+    searchHandler,
   };
 });

@@ -8,9 +8,9 @@ import { Interface } from "readline";
 
 const main = useCounterStore();
 const { userList, isTrue, selectedUser } = storeToRefs(main);
-const { findAll, deleteUser, modifyProfilePhoto } = main;
+const { findAll, deleteUser, modifyProfilePhoto, searchHandler } = main;
 const toast = useToast();
-
+let searchValue = ref("");
 onMounted(async () => {
   try {
     await findAll();
@@ -84,10 +84,45 @@ const fileHandler = async (event: Event, id: string, date: string) => {
     }
   }
 };
+
+// just want to test gsi so i made this method
+const searchVal = async () => {
+  if (!searchValue.value) {
+    toast.error("Please type the value you want to search");
+    return;
+  }
+  try {
+    const res = await searchHandler(searchValue.value);
+    if (!res.userList) {
+      toast.error("There is no user with that name");
+      return;
+    }
+    userList.value = res.userList;
+  } catch (error: any) {
+    if (error.response) {
+      toast.error(error.response.data.message);
+    } else {
+      toast.error("An unexpected error occurred. Please try again later.");
+    }
+  }
+};
 </script>
 
 <template>
   <div class="header">
+    <div class="searchInput">
+      <div class="sub-searchInput">
+        <input
+          type="text"
+          placeholder="search..."
+          class="inputType"
+          v-model="searchValue"
+        />
+      </div>
+      <div class="searchDiv">
+        <button class="searchBtn" @click="searchVal">Search</button>
+      </div>
+    </div>
     <div class="sub-header">
       <table class="userTable">
         <thead>
@@ -208,5 +243,30 @@ const fileHandler = async (event: Event, id: string, date: string) => {
 
 .sub-updateForm {
   text-align: center;
+}
+
+.searchInput {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.sub-searchInput {
+  margin-right: 10px;
+}
+
+.inputType {
+  width: 150px;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+.searchBtn {
+  padding: 15px;
+  border-radius: 5px;
+  border: 1px solid lightgray;
+  cursor: pointer;
 }
 </style>
